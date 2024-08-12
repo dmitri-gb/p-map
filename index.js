@@ -190,6 +190,7 @@ export function pMapIterable(
 		async * [Symbol.asyncIterator]() {
 			const iterator = iterable[Symbol.asyncIterator] === undefined ? iterable[Symbol.iterator]() : iterable[Symbol.asyncIterator]();
 
+			let nextIterResult = iterator.next();
 			const promises = [];
 			let pendingPromisesCount = 0;
 			let isDone = false;
@@ -202,7 +203,10 @@ export function pMapIterable(
 
 				const promise = (async () => {
 					pendingPromisesCount++;
-					const {done, value} = await iterator.next();
+
+					const iterResult = nextIterResult;
+					nextIterResult = iterator.next();
+					const {done, value} = await iterResult;
 
 					if (done) {
 						pendingPromisesCount--;
